@@ -1,0 +1,24 @@
+//Rodar algoritmo de controle para um dos drones(seg2 no exemplo abaixo)
+rosrun formacao controle.py seg2
+
+//Inicializar o Gazebo com a formação em V
+rosrun gazebo_ros gazebo $(rospack find formacao)/world/formacaoV.world
+
+//Rodar algoritmo de movimentação de Diferença Global Fixa(no exemplo abaixo seg1 segue o lider em posição global relativa (-1;-1;0))
+rosrun formacao movimentacaoDGF.py seg1 lider -1 -1 0
+
+//Rodar algoritmo de movimentação de Dupla Fixação(no exemplo abaixo seg1 segue o lider sendo ennxergado pelo líder na posição (-1;-1;0)) e com uma diferença de 0º em Yaw
+rosrun formacao movimentacaoDF.py seg1 lider -1 -1 0 0
+
+//Faz com que o Gazebo spawne um Quadrotor de nome "lider" na posição (0;0;1) a partir do arquivo model.sdf na pasta Quadrotor (modificado a partir do modelo de Quadrotor padrão do Gazebo)
+rosrun gazebo_ros spawn_model -file $(rospack find formacao)/Quadrotor/model.sdf -sdf -model lider -z 1
+
+//Publica no tópico "objetivo_lider" com uma frequência de 10Hz a posição objetivo do líder(que será transformada em controle de velocidade pelo nó "controle"). O <TAB TAB> é uma forma de dizer para depois de especificar o tipo da mensagem (geometry_msgs/Pose) apertar a tecla TAB duas vezes. Ao fazer isso o terminal fornecerá o modelo de mensagem especificado, evitando assim ter que decorar mais padrões chatos.
+rostopic pub -r 10 objetivo_lider geometry_msgs/Pose <TAB TAB>
+
+//Pega as informações de pose do lider em um arquivo de log do Gazebo e salva em um arquivo "init_log_lider.txt"
+gz log -e -f ./gzserver/state.log --filter lider.pose > $(rospack find formacao)/init_log_lider.txt
+
+//Seleciona as linhas que começam em "<pose>" no arquivo "init_log_lider.txt" e salva elas no arquivo "log_lider.txt"
+grep '<pose>' init_log_lider.txt > log_lider.txt
+
